@@ -40,7 +40,7 @@ def build_skills_graph(path_to_skills):
         # iterate over all groups (one group represents one occupation)
         index = 0
         for row_idx, row in group.iterrows():
-            # iterate over all skills in a occupations
+            # iterate over all skills in an occupation
             # and add an edge between skills in the same occupation if it doesn't exist
             # increase weight for every additional time two skills belong to the same occupation
             current_node = row['Element ID']
