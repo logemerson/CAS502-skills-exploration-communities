@@ -55,23 +55,23 @@ def build_skills_graph(path_to_skills):
             index = index+1
     return skills_graph
     
+if __name__ == "__main__":
+    skills_graph = build_skills_graph("data/Skills.xlsx")
+    selected_skill = input("Enter the code of a skill: ")
+    edges = skills_graph.edges(selected_skill, data=True)
+    edges = sorted(edges, reverse=True, key=lambda edge: edge[2].get('weight', 1))
+    #resolution parameter to be finalized (issue 15)
+    communities = nx.community.louvain_communities(skills_graph, resolution=1.2)
 
-skills_graph = build_skills_graph("data/Skills.xlsx")
-selected_skill = input("Enter the code of a skill: ")
-edges = skills_graph.edges(selected_skill, data=True)
-edges = sorted(edges, reverse=True, key=lambda edge: edge[2].get('weight', 1))
-#resolution parameter to be finalized (issue 15)
-communities = nx.community.louvain_communities(skills_graph, resolution=1.2)
-
-print(f'\nNumber of communities: {len(communities)}') # ==16
-print("\n")
-
-print(f'\nOften used skills with "{skills_graph.nodes[selected_skill]['label']} ({selected_skill})":')
-occupations_selected = skills_graph.nodes[selected_skill]["occupations"]
-for edge in edges[:10]:
-    occupations = skills_graph.nodes[edge[1]]['occupations']
-    intersection = sorted(list(set(occupations_selected) & set(occupations)), reverse=True, key=lambda prof: prof[1])
-    print(f'"{skills_graph.nodes[edge[1]]['label']} ({edge[1]})" e.g. as {", ".join([f'{occup[0]} ({occup[1]})' for occup in intersection[:5]])}')
+    print(f'\nNumber of communities: {len(communities)}') # ==16
     print("\n")
+
+    print(f'\nOften used skills with "{skills_graph.nodes[selected_skill]['label']} ({selected_skill})":')
+    occupations_selected = skills_graph.nodes[selected_skill]["occupations"]
+    for edge in edges[:10]:
+        occupations = skills_graph.nodes[edge[1]]['occupations']
+        intersection = sorted(list(set(occupations_selected) & set(occupations)), reverse=True, key=lambda prof: prof[1])
+        print(f'"{skills_graph.nodes[edge[1]]['label']} ({edge[1]})" e.g. as {", ".join([f'{occup[0]} ({occup[1]})' for occup in intersection[:5]])}')
+        print("\n")
 
 
