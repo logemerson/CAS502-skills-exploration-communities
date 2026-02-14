@@ -55,6 +55,29 @@ def build_skills_graph(path_to_skills):
             index = index+1
     return skills_graph
     
+def community_detection(skills_graph, resolution=1.0):
+    """
+    Detect communities in the skills graph using the Louvain algorithm.
+    
+    Args:
+        skills_graph: NetworkX graph object containing skills and their connections
+        resolution: Resolution parameter for the Louvain algorithm (default 1.0)
+                   Higher values create more communities, lower values create fewer
+    
+    Returns:
+        Dictionary mapping skill IDs to their community ID
+        Example: {'2.A.1.a': 0, '2.A.1.b': 0, '2.B.1.a': 1}
+    """
+    communities = nx.community.louvain_communities(skills_graph, resolution=resolution)
+    
+    # Convert from list of sets to dictionary mapping skill -> community_id
+    skill_to_community = {}
+    for community_id, community in enumerate(communities):
+        for skill in community:
+            skill_to_community[skill] = community_id
+    
+    return skill_to_community
+
 if __name__ == "__main__":
     skills_graph = build_skills_graph("data/Skills.xlsx")
     selected_skill = input("Enter the code of a skill: ")
