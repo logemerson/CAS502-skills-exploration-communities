@@ -49,3 +49,109 @@ class TestAddOccupation(unittest.TestCase):
         
         # Check that all three were added
         self.assertEqual(len(test_graph.nodes['SK003']['occupations']), 3)
+
+
+class TestBuildSkillsGraph(unittest.TestCase):
+    
+    def test_build_skills_graph_creates_graph(self):
+        # Create a minimal test Excel file with just a few rows
+        import pandas as pd
+        import tempfile
+        import os
+        
+        # Create test data that mimics the Skills.xlsx structure
+        test_data = {
+            'O*NET-SOC Code': ['11-1011.00', '11-1011.00', '11-2021.00'],
+            'Element ID': ['2.A.1.a', '2.A.1.b', '2.A.1.a'],
+            'Element Name': ['Reading Comprehension', 'Active Listening', 'Reading Comprehension'],
+            'Scale ID': ['IM', 'IM', 'IM'],
+            'Data Value': [3.5, 3.0, 4.0],
+            'Title': ['CEO', 'CEO', 'Marketing Manager']
+        }
+        df = pd.DataFrame(test_data)
+        
+        # Save to a temporary Excel file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.xlsx', delete=False) as tmp_file:
+            temp_path = tmp_file.name
+            df.to_excel(temp_path, index=False)
+        
+        try:
+            # Call the function with our test file
+            graph = skills.build_skills_graph(temp_path)
+            
+            # Test that a graph was created
+            self.assertIsNotNone(graph)
+            
+            # Test that the graph has nodes
+            self.assertGreater(len(graph.nodes), 0)
+            
+        finally:
+            # Clean up the temporary file
+            os.unlink(temp_path)
+
+    def test_build_skills_graph_creates_correct_nodes(self):
+        # Create test data with known skills
+        import pandas as pd
+        import tempfile
+        import os
+        
+        test_data = {
+            'O*NET-SOC Code': ['11-1011.00', '11-1011.00'],
+            'Element ID': ['2.A.1.a', '2.A.1.b'],
+            'Element Name': ['Reading Comprehension', 'Active Listening'],
+            'Scale ID': ['IM', 'IM'],
+            'Data Value': [3.5, 3.0],
+            'Title': ['CEO', 'CEO']
+        }
+        df = pd.DataFrame(test_data)
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.xlsx', delete=False) as tmp_file:
+            temp_path = tmp_file.name
+            df.to_excel(temp_path, index=False)
+        
+        try:
+            graph = skills.build_skills_graph(temp_path)
+            
+            # Check that specific nodes were created
+            self.assertIn('2.A.1.a', graph.nodes)
+            self.assertIn('2.A.1.b', graph.nodes)
+            
+            # Check that nodes have the correct labels
+            self.assertEqual(graph.nodes['2.A.1.a']['label'], 'Reading Comprehension')
+            
+        finally:
+            os.unlink(temp_path)
+
+    def test_build_skills_graph_creates_edges(self):
+        # Create test data where two skills appear in the same occupation
+        import pandas as pd
+        import tempfile
+        import os
+        
+        test_data = {
+            'O*NET-SOC Code': ['11-1011.00', '11-1011.00'],
+            'Element ID': ['2.A.1.a', '2.A.1.b'],
+            'Element Name': ['Reading Comprehension', 'Active Listening'],
+            'Scale ID': ['IM', 'IM'],
+            'Data Value': [3.5, 3.0],
+            'Title': ['CEO', 'CEO']
+        }
+        df = pd.DataFrame(test_data)
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.xlsx', delete=False) as tmp_file:
+            temp_path = tmp_file.name
+            df.to_excel(temp_path, index=False)
+        
+        try:
+            graph = skills.build_skills_graph(temp_path)
+            
+            # Check that an edge exists between the two skills (they're in the same occupation)
+            self.assertTrue(graph.has_edge('2.A.1.a', '2.A.1.b'))
+            
+            # Check that the edge has a weight
+            self.assertIn('weight', graph['2.A.1.a']['2.A.1.b'])
+            
+        finally:
+            os.unlink(temp_path)
+
+                                
