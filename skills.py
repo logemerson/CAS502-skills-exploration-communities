@@ -78,6 +78,39 @@ def community_detection(skills_graph, resolution=1.0):
     
     return skill_to_community
 
+def get_skills_by_community(skill_to_community_map, skills_graph):
+    """
+    Organize skills by their community assignments with readable labels.
+    
+    Args:
+        skill_to_community_map: Dictionary mapping skill IDs to community IDs
+                               (output from community_detection function)
+        skills_graph: NetworkX graph object containing skill labels
+    
+    Returns:
+        Dictionary where keys are community IDs and values are lists of 
+        (skill_id, skill_label) tuples
+        
+        Example: {
+            0: [('2.A.1.a', 'Reading Comprehension'), ('2.A.1.b', 'Active Listening')],
+            1: [('2.C.1.a', 'Time Management'), ('2.C.1.b', 'Coordination')]
+        }
+    """
+    communities = {}
+    
+    for skill_id, community_id in skill_to_community_map.items():
+        if community_id not in communities:
+            communities[community_id] = []
+        
+        skill_label = skills_graph.nodes[skill_id].get('label', skill_id)
+        communities[community_id].append((skill_id, skill_label))
+    
+    # Sort skills within each community by ID for consistency
+    for community_id in communities:
+        communities[community_id].sort(key=lambda x: x[0])
+    
+    return communities    
+
 if __name__ == "__main__":
     skills_graph = build_skills_graph("data/Skills.xlsx")
     selected_skill = input("Enter the code of a skill: ")
