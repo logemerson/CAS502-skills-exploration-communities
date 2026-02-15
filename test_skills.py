@@ -154,4 +154,118 @@ class TestBuildSkillsGraph(unittest.TestCase):
         finally:
             os.unlink(temp_path)
 
-                                
+class TestCommunityDetection(unittest.TestCase):
+    
+    def setUp(self):
+        """Create a test graph that will be used by multiple tests"""
+        import networkx as nx
+        import pandas as pd
+        import tempfile
+        import os
+        
+        # Create test data with two clear groups of skills
+        test_data = {
+            'O*NET-SOC Code': ['11-1011.00', '11-1011.00', '11-1011.00', '15-1211.00', '15-1211.00', '15-1211.00'],
+            'Element ID': ['2.A.1.a', '2.A.1.b', '2.A.1.c', '2.C.1.a', '2.C.1.b', '2.C.1.c'],
+            'Element Name': ['Reading', 'Writing', 'Speaking', 'Programming', 'Debugging', 'Testing'],
+            'Scale ID': ['IM', 'IM', 'IM', 'IM', 'IM', 'IM'],
+            'Data Value': [3.5, 3.5, 3.5, 4.0, 4.0, 4.0],
+            'Title': ['Manager', 'Manager', 'Manager', 'Developer', 'Developer', 'Developer']
+        }
+        df = pd.DataFrame(test_data)
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.xlsx', delete=False) as tmp_file:
+            self.temp_path = tmp_file.name
+            df.to_excel(self.temp_path, index=False)
+        
+        self.test_graph = skills.build_skills_graph(self.temp_path)
+    
+    def tearDown(self):
+        """Clean up temporary file after each test"""
+        import os
+        os.unlink(self.temp_path)
+    
+    def test_community_detection_returns_dict(self):
+        """Test that community_detection returns a dictionary"""
+        result = skills.community_detection(self.test_graph)
+        self.assertIsInstance(result, dict)
+    
+    def test_community_detection_maps_all_nodes(self):
+        """Test that every node in the graph gets assigned to a community"""
+        result = skills.community_detection(self.test_graph)
+        # Every node should be in the result
+        for node in self.test_graph.nodes():
+            self.assertIn(node, result)
+    
+    def test_community_detection_assigns_valid_community_ids(self):
+        """Test that community IDs are non-negative integers"""
+        result = skills.community_detection(self.test_graph)
+        for community_id in result.values():
+            self.assertIsInstance(community_id, int)
+            self.assertGreaterEqual(community_id, 0)
+    
+    def test_get_skills_by_community_returns_dict(self):
+        """Test that get_skills_by_community returns a dictionary"""
+        mapping = skills.community_detection(self.test_graph)
+        result = skills.get_skills_by_community(mapping, self.test_graph)
+        self.assertIsInstance(result, dict)
+    
+    def test_get_skills_by_community_includes_all_skills(self):
+        """Test that all skills appear in the community organization"""
+        mapping = skills.community_detection(self.test_graph)
+        result = skills.get_skills_by_community(mapping, self.test_graph)
+        
+        # Flatten all skills from all communities
+        all_skills_in_result = []
+        for community_skills in result.values():
+            all_skills_in_result.extend([skill_id for skill_id, _ in community_skills])
+        
+        # Check that every node from the graph appears exactly once
+        self.assertEqual(sorted(all_skills_in_result), sorted(self.test_graph.nodes()))
+    
+    def test_get_skills_by_community_includes_labels(self):
+        """Test that skills are returned with their labels"""
+        mapping = skills.community_detection(self.test_graph)
+        result = skills.get_skills_by_community(mapping, self.test_graph)
+        
+        # Get any community's skills
+        first_community = list(result.values())[0]
+        
+        # Check that each entry is a tuple of (skill_id, skill_label)
+        for skill_id, skill_label in first_community:
+            self.assertIsInstance(skill_id, str)
+            self.assertIsInstance(skill_label, str)
+            # Verify the label matches what's in the graph
+            self.assertEqual(skill_label, self.test_graph.nodes[skill_id]['label'])
+    
+    def test_visualize_communities_creates_file(self):
+        """Test that visualize_communities creates an output file"""
+        import os
+        import tempfile
+        
+        mapping = skills.community_detection(self.test_graph)
+        
+        # Use a temporary file for output
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.png', delete=False) as tmp_file:
+            output_path = tmp_file.name
+        
+        try:
+            result_path = skills.visualize_communities(self.test_graph, mapping, output_path)
+            
+            # Check that the function returns the path
+            self.assertEqual(result_path, output_path)
+            
+            # Check that the file was actually created
+            self.assertTrue(os.path.exists(output_path))
+            
+            # Check that the file has content (not empty)
+            self.assertGreater(os.path.getsize(output_path), 0)
+            
+        finally:
+            # Clean up
+            if os.path.exists(output_path):
+                os.unlink(output_path)
+
+
+if __name__ == '__main__':
+    unittest.main()                                
