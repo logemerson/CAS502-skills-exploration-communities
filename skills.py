@@ -55,6 +55,120 @@ def build_skills_graph(path_to_skills):
             index = index+1
     return skills_graph
     
+def community_detection(skills_graph, resolution=1.0):
+    """
+    Detect communities in the skills graph using the Louvain algorithm.
+    
+    Args:
+        skills_graph: NetworkX graph object containing skills and their connections
+        resolution: Resolution parameter for the Louvain algorithm (default 1.0)
+                   Higher values create more communities, lower values create fewer
+    
+    Returns:
+        Dictionary mapping skill IDs to their community ID
+        Example: {'2.A.1.a': 0, '2.A.1.b': 0, '2.B.1.a': 1}
+    """
+    communities = nx.community.louvain_communities(skills_graph, resolution=resolution)
+    
+    # Convert from list of sets to dictionary mapping skill -> community_id
+    skill_to_community = {}
+    for community_id, community in enumerate(communities):
+        for skill in community:
+            skill_to_community[skill] = community_id
+    
+    return skill_to_community
+
+def get_skills_by_community(skill_to_community_map, skills_graph):
+    """
+    Organize skills by their community assignments with readable labels.
+    
+    Args:
+        skill_to_community_map: Dictionary mapping skill IDs to community IDs
+                               (output from community_detection function)
+        skills_graph: NetworkX graph object containing skill labels
+    
+    Returns:
+        Dictionary where keys are community IDs and values are lists of 
+        (skill_id, skill_label) tuples
+        
+        Example: {
+            0: [('2.A.1.a', 'Reading Comprehension'), ('2.A.1.b', 'Active Listening')],
+            1: [('2.C.1.a', 'Time Management'), ('2.C.1.b', 'Coordination')]
+        }
+    """
+    communities = {}
+    
+    for skill_id, community_id in skill_to_community_map.items():
+        if community_id not in communities:
+            communities[community_id] = []
+        
+        skill_label = skills_graph.nodes[skill_id].get('label', skill_id)
+        communities[community_id].append((skill_id, skill_label))
+    
+    # Sort skills within each community by ID for consistency
+    for community_id in communities:
+        communities[community_id].sort(key=lambda x: x[0])
+    
+    return communities
+
+def visualize_communities(skills_graph, skill_to_community_map, output_file='community_graph.png'):
+    """
+    Create a visualization of the skills network with nodes colored by community.
+    
+    Args:
+        skills_graph: NetworkX graph object containing skills and connections
+        skill_to_community_map: Dictionary mapping skill IDs to community IDs
+        output_file: Filename to save the visualization (default: 'community_graph.png')
+    
+    Returns:
+        Path to the saved visualization file
+    """
+    # Create a color map for nodes based on their community
+    communities = set(skill_to_community_map.values())
+    colors = plt.cm.Set3(range(len(communities)))  # Use Set3 colormap for distinct colors
+    
+    node_colors = []
+    for node in skills_graph.nodes():
+        community_id = skill_to_community_map.get(node, 0)
+        node_colors.append(colors[community_id])
+    
+    # Create the visualization
+    plt.figure(figsize=(16, 12))
+    
+    # Use spring layout for better separation of communities
+    pos = nx.spring_layout(skills_graph, k=0.5, iterations=50, seed=42)
+    
+    # Draw the graph
+    nx.draw_networkx_nodes(skills_graph, pos, node_color=node_colors, 
+                          node_size=100, alpha=0.8)
+    nx.draw_networkx_edges(skills_graph, pos, alpha=0.2, width=0.5)
+    
+    # Add labels for a subset of nodes (to avoid clutter)
+    # Label the 10 most connected nodes in each community
+    labels_to_show = {}
+    communities_dict = get_skills_by_community(skill_to_community_map, skills_graph)
+    
+    for community_id, skills in communities_dict.items():
+        # Get node degrees for skills in this community
+        skill_degrees = [(skill_id, skills_graph.degree(skill_id)) for skill_id, _ in skills]
+        # Sort by degree and take top 5
+        top_skills = sorted(skill_degrees, key=lambda x: x[1], reverse=True)[:5]
+        for skill_id, _ in top_skills:
+            labels_to_show[skill_id] = skills_graph.nodes[skill_id]['label']
+    
+    nx.draw_networkx_labels(skills_graph, pos, labels_to_show, font_size=8)
+    
+    plt.title(f'Skills Network - {len(communities)} Communities Detected', fontsize=16)
+    plt.axis('off')
+    plt.tight_layout()
+    
+    # Save the figure
+    plt.savefig(output_file, dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    print(f"Visualization saved to {output_file}")
+    return output_file        
+
 if __name__ == "__main__":
     skills_graph = build_skills_graph("data/Skills.xlsx")
     selected_skill = input("Enter the code of a skill: ")
