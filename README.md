@@ -90,6 +90,31 @@ All 13 unit tests should pass, covering graph construction, community detection,
 
 For detailed architecture documentation, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
+## Contributing
+
+We welcome contributions! If you'd like to contribute to this project:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/your-feature-name`)
+3. Make your changes and commit them with descriptive messages
+4. Add tests for any new functionality
+5. Ensure all tests pass (`python -m unittest test_skills.py -v`)
+6. Push to your fork and submit a pull request
+
+Please follow the existing code style and include appropriate documentation for any new features.
+
+## Bug Reports and Feature Requests
+
+If you encounter bugs or have feature requests:
+
+1. Check the [Issues](https://github.com/logemerson/CAS502-skills-exploration-communities/issues) page to see if it's already reported
+2. If not, create a new issue with:
+   - A clear, descriptive title
+   - Detailed description of the bug or feature request
+   - Steps to reproduce (for bugs)
+   - Expected vs. actual behavior (for bugs)
+   - Your Python version and operating system
+
 ## References
 
 Alabdulkareem, A., Frank, M. R., Sun, L., AlShebli, B., Hidalgo, C., & Rahwan, I. (2018). Unpacking the polarization of workplace skills. *Science Advances*, 4(7), eaao6030. https://doi.org/10.1126/sciadv.aao6030
