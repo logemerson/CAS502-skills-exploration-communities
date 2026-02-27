@@ -296,5 +296,4 @@ class TestCommunityDetection(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()                                
-            os.unlink(temp_path)
+    unittest.main()
