@@ -29,8 +29,10 @@ def build_skills_graph(path_to_skills):
     MINIMUM_SKILL_IMPORTANCE = 2.5
     
     df = pd.read_excel(path_to_skills)
-
-    filtered_df = df[df['Scale ID'] == 'IM'][df['Data Value'] > MINIMUM_SKILL_IMPORTANCE]
+    filtered_df = df[
+        (df['Scale ID'] == 'IM') &
+        (df['Data Value'] > MINIMUM_SKILL_IMPORTANCE)
+    ]
     filtered_df = filtered_df.reset_index()
     
     # group data by O*NET-SOC Code so we can then iterate over each skill in each occupation
