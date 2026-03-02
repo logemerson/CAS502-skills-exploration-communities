@@ -38,6 +38,7 @@ This clustering validates the skill polarization patterns identified in publishe
 ## Installation
 
 ### Requirements
+Install dependencies via [requirements.txt](requirements.txt).
 - Python 3.9+
 - pandas
 - networkx
@@ -50,9 +51,6 @@ This clustering validates the skill polarization patterns identified in publishe
 git clone https://github.com/logemerson/CAS502-skills-exploration-communities.git
 cd CAS502-skills-exploration-communities
 ```
-#### Dependency Installation
-Install dependencies via [requirements.txt](requirements.txt).
-
 ## Usage
 
 ### Basic Usage
