@@ -1,0 +1,12 @@
+cff-version: 1.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Emerson"
+  given-names: "Logan"
+- family-names: "Estrada"
+  given-names: "George"
+title: "Skills Exploration with Louvain Community Detection"
+version: 1.0
+doi: 10.5281/zenodo.18841347
+date-released: 2026-03-02
+url: "https://github.com/logemerson/CAS502-skills-exploration-communities"
