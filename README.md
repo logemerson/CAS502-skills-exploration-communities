@@ -45,14 +45,13 @@ This clustering validates the skill polarization patterns identified in publishe
 - openpyxl
 
 ### Setup
+#### Clone the repository
 ```bash
-# Clone the repository
 git clone https://github.com/logemerson/CAS502-skills-exploration-communities.git
 cd CAS502-skills-exploration-communities
-
-# Install dependencies
-pip install pandas networkx matplotlib openpyxl
 ```
+#### Dependency Installation
+Install dependencies via [requirements.txt](requirements.txt).
 
 ## Usage
 
