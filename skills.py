@@ -25,10 +25,12 @@ def add_neighbor(skills_graph, group, neighbor_idx, current_node, row):
     skills_graph[current_node][neighbor_node]["weight"] = skills_graph[current_node][neighbor_node]["weight"] + 1
 
 def build_skills_graph(path_to_skills):
+    #O*NET skill importance threshold
+    MINIMUM_SKILL_IMPORTANCE = 2.5
+    
     df = pd.read_excel(path_to_skills)
 
-    # only use skills with importance greater than 2.5
-    filtered_df = df[df['Scale ID'] == 'IM'][df['Data Value'] > 2.5]
+    filtered_df = df[df['Scale ID'] == 'IM'][df['Data Value'] > MINIMUM_SKILL_IMPORTANCE]
     filtered_df = filtered_df.reset_index()
     
     # group data by O*NET-SOC Code so we can then iterate over each skill in each occupation
