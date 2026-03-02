@@ -83,7 +83,7 @@ visualize_communities(graph, communities_map, 'output.png')
 python -m unittest test_skills.py -v
 ```
 
-All 13 unit tests should pass, covering graph construction, community detection, and visualization functions.
+All 16 unit tests should pass, covering graph construction, community detection, and visualization functions.
 
 ## Technical Documentation
 
